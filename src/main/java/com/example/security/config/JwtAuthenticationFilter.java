@@ -1,5 +1,6 @@
 package com.example.security.config;
 
+import com.example.security.service.JwtService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,12 +15,25 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+private final JwtService jwtService;
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
          @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
+        final String authorizationHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String userEmail;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+         filterChain.doFilter(request, response);
+         return;
+        }
+        // get jwt
+        jwt = authorizationHeader.substring(7);
+
+        userEmail = jwtService.extractUsername(jwt);
 
     }
 }
