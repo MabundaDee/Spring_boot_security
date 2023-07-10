@@ -32,8 +32,9 @@ private final JwtService jwtService;
         }
         // get jwt
         jwt = authorizationHeader.substring(7);
-
         userEmail = jwtService.extractUsername(jwt);
 
+        }
+
     }
-}
+
