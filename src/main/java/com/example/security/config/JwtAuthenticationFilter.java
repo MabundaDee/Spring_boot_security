@@ -3,6 +3,9 @@ package com.example.security.config;
 import com.example.security.service.JwtService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,25 +19,39 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-private final JwtService jwtService;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
-         @NonNull HttpServletResponse response,
+            @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         final String authorizationHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-         filterChain.doFilter(request, response);
-         return;
+            filterChain.doFilter(request, response);
+            return;
         }
         // get jwt
         jwt = authorizationHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
+        // if jwt is valid, set security context
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+//            if (jwtService.isTokenValid(jwt, userDetails)) {
+//                final UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+//                        new UsernamePasswordAuthenticationToken(
+//                                userDetails, null, userDetails.getAuthorities());
+//                usernamePasswordAuthenticationToken
+//                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+//            }
 
         }
 
     }
+}
 
