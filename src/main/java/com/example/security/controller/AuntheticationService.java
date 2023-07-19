@@ -25,7 +25,7 @@ public class AuntheticationService {
                 .lastname(request.getLastname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(Role.Role_USER)
                 .build();
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
